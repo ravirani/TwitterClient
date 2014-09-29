@@ -1,5 +1,7 @@
 package com.ravcode.apps.twitterclient.models;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +17,8 @@ public class Tweet {
     private String createdAt;
     private User user;
 
-    private static long maxTweetID = 0;
+    private static long lowestTweetID = 0;
+    private static long highestTweetID = 0;
 
     public static Tweet fromJSON(JSONObject tweetJSONObject) {
         Tweet tweet = new Tweet();
@@ -53,6 +56,7 @@ public class Tweet {
         ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 
         long lowestTweetID = 0;
+        long highestTweetID = 0;
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject tweetJSON = null;
             try {
@@ -63,9 +67,9 @@ public class Tweet {
                 continue;
             }
 
-
             Tweet tweet = Tweet.fromJSON(tweetJSON);
             if (tweet != null) {
+                highestTweetID = Math.max(highestTweetID, tweet.getUid());
                 if (lowestTweetID == 0) {
                     lowestTweetID = tweet.getUid();
                 }
@@ -74,13 +78,15 @@ public class Tweet {
                     lowestTweetID = tweet.getUid();
                 }
 
+                Log.d("INFO", "UID - " + tweet.getUid());
                 tweets.add(tweet);
             }
         }
 
         // Reduced by one to remove duplicates
         // https://dev.twitter.com/rest/public/timelines
-        maxTweetID = lowestTweetID - 1;
+        Tweet.lowestTweetID = lowestTweetID - 1;
+        Tweet.highestTweetID = highestTweetID;
         return tweets;
     }
 
@@ -89,7 +95,11 @@ public class Tweet {
         return body;
     }
 
-    public static long getMaxTweetID() {
-        return maxTweetID;
+    public static long getLowestTweetID() {
+        return lowestTweetID;
+    }
+
+    public static long getHighestTweetID() {
+        return highestTweetID;
     }
 }
