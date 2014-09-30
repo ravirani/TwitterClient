@@ -1,12 +1,13 @@
 package com.ravcode.apps.twitterclient;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.ravcode.apps.twitterclient.models.Tweet;
@@ -20,7 +21,7 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 
-public class TimelineActivity extends Activity {
+public class TimelineActivity extends FragmentActivity {
     private TwitterClient twitterClient;
     private ArrayList<Tweet> tweets;
     private TweetArrayAdapter aTweets;
@@ -37,7 +38,7 @@ public class TimelineActivity extends Activity {
 
         // Fetch views, init and bind adapter
         lvTweets = (ListView)findViewById(R.id.lvTweets);
-        tweets = new ArrayList<Tweet>();
+        tweets = new ArrayList<Tweet>(Tweet.fetchAllTweets());
         aTweets = new TweetArrayAdapter(this, tweets);
         lvTweets.setAdapter(aTweets);
 
@@ -68,27 +69,37 @@ public class TimelineActivity extends Activity {
 
     public void populateTimeline(int page) {
 
-        final int pageNumber = page;
-        final long maxID = pageNumber > 0 ? Tweet.getLowestTweetID() : 0;
+        final long maxID = page > 0 ? Tweet.getLowestTweetID() : 0;
+        final long sinceID = page < 0 ? Tweet.getHighestTweetID() : 0;
 
-        twitterClient.getHomeTimeline(maxID, new JsonHttpResponseHandler() {
+        twitterClient.getHomeTimeline(maxID, sinceID, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(JSONArray jsonArray) {
                 mPullToRefreshLayout.setRefreshComplete();
                 ArrayList<Tweet> newTweets = Tweet.fromJSONArray(jsonArray);
 
-                if (pageNumber < 0) {
-                     aTweets.clear();
+                if (sinceID > 0) {
+                    for (Tweet tweet: newTweets) {
+                       aTweets.insert(tweet, 0);
+                    }
+                }
+                else {
+                    aTweets.addAll(newTweets);
                 }
 
-                aTweets.addAll(newTweets);
+                aTweets.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Throwable e, String s) {
                 mPullToRefreshLayout.setRefreshComplete();
-                Log.d("DEBUG", e.toString());
-                Log.d("DEBUG", s);
+                Toast.makeText(TimelineActivity.this, "Failed fetching tweets = " + s, Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            protected void handleFailureMessage(Throwable throwable, String s) {
+                mPullToRefreshLayout.setRefreshComplete();
+                Toast.makeText(TimelineActivity.this, "Failed fetching tweets = " + s, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -110,5 +121,13 @@ public class TimelineActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onCreateNewTweet(MenuItem item) {
+        String screenName = null;
+        String userName = null;
+        String userProfileImageURL = null;
+        ComposeTweetFragment composeTweetFragment = ComposeTweetFragment.newInstance(userProfileImageURL, screenName, userName);
+        composeTweetFragment.show(getSupportFragmentManager(), "fragment_compose_new_tweet");
     }
 }

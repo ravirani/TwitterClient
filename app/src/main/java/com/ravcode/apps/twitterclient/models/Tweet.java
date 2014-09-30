@@ -2,19 +2,35 @@ package com.ravcode.apps.twitterclient.models;
 
 import android.util.Log;
 
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Select;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ravi on 9/28/14.
  */
-public class Tweet {
+
+@Table(name = "tweets")
+public class Tweet extends Model {
+
+    @Column(name = "body")
     private String body;
+
+    @Column(name = "uid", index = true, unique = true)
     private long uid;
+
+    @Column(name = "createdAt")
     private String createdAt;
+
+    @Column(name = "user", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
     private User user;
 
     private static long lowestTweetID = 0;
@@ -23,17 +39,37 @@ public class Tweet {
     public static Tweet fromJSON(JSONObject tweetJSONObject) {
         Tweet tweet = new Tweet();
         try {
+            long tweetID = tweetJSONObject.getLong("id");
+            if (Tweet.getTweetByID(tweetID) != null) {
+                // Do not return existing tweets
+                return null;
+            }
+
             tweet.body = tweetJSONObject.getString("text");
-            tweet.uid = tweetJSONObject.getLong("id");
+            tweet.uid = tweetID;
             tweet.createdAt = tweetJSONObject.getString("created_at");
             tweet.user = User.fromJSON(tweetJSONObject.getJSONObject("user"));
-
+            tweet.save();
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
 
         return tweet;
+    }
+
+    public static List<Tweet> fetchAllTweets() {
+        return new Select()
+                .from(Tweet.class)
+                .orderBy("uid DESC")
+                .execute();
+    }
+
+    public static Tweet getTweetByID(long uid) {
+        return new Select()
+                .from(Tweet.class)
+                .where("uid = ?", uid)
+                .executeSingle();
     }
 
     public String getBody() {

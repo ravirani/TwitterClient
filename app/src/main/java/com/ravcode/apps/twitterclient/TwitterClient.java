@@ -32,14 +32,17 @@ public class TwitterClient extends OAuthBaseClient {
 		super(context, REST_API_CLASS, REST_URL, REST_CONSUMER_KEY, REST_CONSUMER_SECRET, REST_CALLBACK_URL);
 	}
 
-    public void getHomeTimeline(long maxID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+    public void getHomeTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         String apiURL = getApiUrl("statuses/home_timeline.json");
         RequestParams requestParams = new RequestParams();
         requestParams.put("exclude_replies", "true");
-        requestParams.put("count", "10");
+        requestParams.put("count", "200");
         if (maxID > 0) {
             // Right way to achieve pagination - https://dev.twitter.com/rest/public/timelines
             requestParams.put("max_id", "" + maxID);
+        }
+        else if (sinceID > 0) {
+            requestParams.put("since_id", "" + sinceID);
         }
 
         client.get(apiURL, requestParams, asyncHttpResponseHandler);

@@ -9,5 +9,7 @@
     <string name="placeholder_screenname">\@ravirani</string>
     <string name="placeholder_username">Ravi Rani</string>
     <string name="placeholder_timestamp">25m</string>
+    <string name="action_create_new_tweet">New Tweet</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
