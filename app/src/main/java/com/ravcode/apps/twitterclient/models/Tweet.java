@@ -114,7 +114,6 @@ public class Tweet extends Model {
                     lowestTweetID = tweet.getUid();
                 }
 
-                Log.d("INFO", "UID - " + tweet.getUid());
                 tweets.add(tweet);
             }
         }

@@ -36,7 +36,7 @@ public class TwitterClient extends OAuthBaseClient {
         String apiURL = getApiUrl("statuses/home_timeline.json");
         RequestParams requestParams = new RequestParams();
         requestParams.put("exclude_replies", "true");
-        requestParams.put("count", "200");
+        requestParams.put("count", "10");
         if (maxID > 0) {
             // Right way to achieve pagination - https://dev.twitter.com/rest/public/timelines
             requestParams.put("max_id", "" + maxID);
@@ -46,5 +46,20 @@ public class TwitterClient extends OAuthBaseClient {
         }
 
         client.get(apiURL, requestParams, asyncHttpResponseHandler);
+    }
+
+    public void getLoggedInUserCredentials(AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        String apiURL = getApiUrl("account/verify_credentials.json");
+        RequestParams requestParams = new RequestParams();
+        requestParams.put("include_entities", "false");
+        requestParams.put("skip_status", "true");
+        client.get(apiURL, requestParams, asyncHttpResponseHandler);
+    }
+
+    public void postTweet(String tweetText, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        String apiURL = getApiUrl("statuses/update.json");
+        RequestParams requestParams = new RequestParams();
+        requestParams.put("status", tweetText);
+        client.post(apiURL, requestParams, asyncHttpResponseHandler);
     }
 }
