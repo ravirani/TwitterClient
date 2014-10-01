@@ -4,7 +4,7 @@
 
     <item android:id="@+id/action_create_new"
         android:title="@string/action_create_new_tweet"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/ic_menu_compose"
         android:onClick="onCreateNewTweet"
         android:orderInCategory="100"
         android:showAsAction="always" />
