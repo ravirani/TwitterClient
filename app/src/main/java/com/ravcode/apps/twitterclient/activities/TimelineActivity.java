@@ -14,7 +14,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.ravcode.apps.twitterclient.fragments.HomeTimelineFragment;
+import com.ravcode.apps.twitterclient.fragments.TweetsListFragment;
 import com.ravcode.apps.twitterclient.models.Tweet;
+import com.ravcode.apps.twitterclient.utils.NetworkConnectivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,12 +30,9 @@ import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 
-public class TimelineActivity extends FragmentActivity implements ComposeTweetFragment.OnComposeTweetListener {
+public class TimelineActivity extends FragmentActivity implements com.ravcode.apps.twitterclient.ComposeTweetFragment.OnComposeTweetListener {
     private TwitterClient twitterClient;
-    private ArrayList<Tweet> tweets;
-    private TweetArrayAdapter aTweets;
-    private ListView lvTweets;
-    private PullToRefreshLayout mPullToRefreshLayout;
+    private HomeTimelineFragment homeTimelineFragment;
 
     // Logged in user's credentials
     private String mProfileImageURL;
@@ -51,32 +51,8 @@ public class TimelineActivity extends FragmentActivity implements ComposeTweetFr
         // Init REST client
         twitterClient = TwitterApplication.getRestClient();
 
-        // Fetch views, init and bind adapter
-        lvTweets = (ListView)findViewById(R.id.lvTweets);
-        tweets = new ArrayList<Tweet>(Tweet.fetchAllTweets());
-        aTweets = new TweetArrayAdapter(this, tweets);
-        lvTweets.setAdapter(aTweets);
-
-        // Setup onScrollListener for loading older tweets on scroll
-        lvTweets.setOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                Log.d("DEBUG", "PAGE = " + page);
-                populateTimeline(page);
-            }
-        });
-
-        // Setup pull-to-refresh
-        mPullToRefreshLayout = (PullToRefreshLayout)findViewById(R.id.ptrLayout);
-        ActionBarPullToRefresh.from(this)
-                .allChildrenArePullable()
-                .listener(new OnRefreshListener() {
-                    @Override
-                    public void onRefreshStarted(View view) {
-                        populateTimeline(-1);
-                    }
-                })
-                .setup(mPullToRefreshLayout);
+        // Load the fragment
+        homeTimelineFragment = (HomeTimelineFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_timeline);
 
         // Read preferences for user credentials
         readUserCredentialsFromPreferences();
@@ -85,49 +61,6 @@ public class TimelineActivity extends FragmentActivity implements ComposeTweetFr
         if (mProfileImageURL == null) {
             fetchUserCredentials();
         }
-
-        // Initial fetch from page zero
-        populateTimeline(0);
-    }
-
-    public void populateTimeline(int page) {
-        if (!checkNetworkConnection()) {
-            return;
-        }
-
-        final long maxID = page > 0 ? Tweet.getLowestTweetID() : 0;
-        final long sinceID = page < 0 ? Tweet.getHighestTweetID() : 0;
-
-        twitterClient.getHomeTimeline(maxID, sinceID, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(JSONArray jsonArray) {
-                mPullToRefreshLayout.setRefreshComplete();
-                ArrayList<Tweet> newTweets = Tweet.fromJSONArray(jsonArray);
-
-                if (sinceID > 0) {
-                    for (Tweet tweet: newTweets) {
-                       aTweets.insert(tweet, 0);
-                    }
-                }
-                else {
-                    aTweets.addAll(newTweets);
-                }
-
-                aTweets.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onFailure(Throwable e, String s) {
-                mPullToRefreshLayout.setRefreshComplete();
-                Toast.makeText(TimelineActivity.this, "Failed fetching tweets = " + s, Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            protected void handleFailureMessage(Throwable throwable, String s) {
-                mPullToRefreshLayout.setRefreshComplete();
-                Toast.makeText(TimelineActivity.this, "Failed fetching tweets = " + s, Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     public void fetchUserCredentials() {
@@ -182,7 +115,7 @@ public class TimelineActivity extends FragmentActivity implements ComposeTweetFr
     }
 
     public void onCreateNewTweet(MenuItem item) {
-        ComposeTweetFragment composeTweetFragment = ComposeTweetFragment.newInstance(mProfileImageURL, mUserScreenName, mUserName);
+        com.ravcode.apps.twitterclient.ComposeTweetFragment composeTweetFragment = com.ravcode.apps.twitterclient.ComposeTweetFragment.newInstance(mProfileImageURL, mUserScreenName, mUserName);
         composeTweetFragment.show(getSupportFragmentManager(), "fragment_compose_new_tweet");
     }
 
@@ -191,9 +124,7 @@ public class TimelineActivity extends FragmentActivity implements ComposeTweetFr
             Tweet tweet = Tweet.getTweetByID(newlyAddedTweetID);
 
             if (tweet != null) {
-                aTweets.insert(tweet, 0);
-                // Updating the feed to update the timestamps
-                aTweets.notifyDataSetChanged();
+                homeTimelineFragment.insertTweet(tweet, 0);
             }
         }
     }
@@ -215,10 +146,7 @@ public class TimelineActivity extends FragmentActivity implements ComposeTweetFr
     }
 
     private Boolean checkNetworkConnection() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        if (activeNetworkInfo == null || !activeNetworkInfo.isConnectedOrConnecting()) {
+        if (!NetworkConnectivity.isAvailable(this)) {
             Toast.makeText(this, "Cannot complete this request. Please check your internet connection or try again later.", Toast.LENGTH_LONG).show();
             return false;
         }
