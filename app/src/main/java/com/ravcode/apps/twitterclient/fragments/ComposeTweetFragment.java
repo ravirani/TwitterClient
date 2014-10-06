@@ -2,9 +2,8 @@ package com.ravcode.apps.twitterclient;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.net.Uri;
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
@@ -24,7 +23,6 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.ravcode.apps.twitterclient.models.Tweet;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -161,7 +159,7 @@ public class ComposeTweetFragment extends DialogFragment {
         twitterClient.postTweet(tweetText, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(JSONObject jsonObject) {
-                Tweet tweet = Tweet.fromJSON(jsonObject);
+                Tweet tweet = Tweet.fromJSON(jsonObject, Tweet.TweetType.HOME_TIMELINE);
                 if (tweet != null && mListener != null) {
                     mListener.OnComposeTweet(tweet.getUid());
                 }

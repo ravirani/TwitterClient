@@ -14,6 +14,7 @@ import com.ravcode.apps.twitterclient.TweetArrayAdapter;
 import com.ravcode.apps.twitterclient.models.Tweet;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
@@ -45,7 +46,8 @@ abstract public class TweetsListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Init the adapter
-        tweets = new ArrayList<Tweet>(Tweet.fetchAllTweets());
+        tweets = new ArrayList<Tweet>(loadInitialData());
+        Tweet.initHighestAndLowestTweetIDs();
         aTweets = new TweetArrayAdapter(getActivity(), tweets);
     }
 
@@ -91,5 +93,6 @@ abstract public class TweetsListFragment extends Fragment {
         aTweets.notifyDataSetChanged();
     }
 
+    protected abstract List loadInitialData();
     protected abstract void loadMoreData(int page);
 }

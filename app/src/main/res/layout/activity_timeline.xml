@@ -4,16 +4,12 @@
     android:layout_height="match_parent"
     tools:context="com.ravcode.apps.twitterclient.TimelineActivity">
 
-    <fragment
+
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:name="com.ravcode.apps.twitterclient.fragments.HomeTimelineFragment"
-        android:id="@+id/fragment_timeline"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        tools:layout="@layout/fragment_tweets_list" />
+        android:id="@+id/flContainer"></FrameLayout>
 </RelativeLayout>

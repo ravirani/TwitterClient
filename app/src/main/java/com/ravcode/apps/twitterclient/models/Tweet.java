@@ -1,7 +1,5 @@
 package com.ravcode.apps.twitterclient.models;
 
-import android.util.Log;
-
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
@@ -21,11 +19,29 @@ import java.util.List;
 @Table(name = "tweets")
 public class Tweet extends Model {
 
+    public enum TweetType {
+        HOME_TIMELINE(1),
+        MENTIONS_TIMELINE(2);
+
+        TweetType(int value) {
+            this.value = value;
+        }
+
+        private int value;
+
+        public int getValue() {
+            return value;
+        }
+    };
+
     @Column(name = "body")
     private String body;
 
     @Column(name = "uid", index = true, unique = true)
     private long uid;
+
+    @Column (name = "tweetType", index = true)
+    private int tweetType;
 
     @Column(name = "createdAt")
     private String createdAt;
@@ -36,7 +52,7 @@ public class Tweet extends Model {
     private static long lowestTweetID = 0;
     private static long highestTweetID = 0;
 
-    public static Tweet fromJSON(JSONObject tweetJSONObject) {
+    public static Tweet fromJSON(JSONObject tweetJSONObject, TweetType tweetType) {
         Tweet tweet = new Tweet();
         try {
             long tweetID = tweetJSONObject.getLong("id");
@@ -47,6 +63,7 @@ public class Tweet extends Model {
 
             tweet.body = tweetJSONObject.getString("text");
             tweet.uid = tweetID;
+            tweet.tweetType = tweetType.getValue();
             tweet.createdAt = tweetJSONObject.getString("created_at");
             tweet.user = User.fromJSON(tweetJSONObject.getJSONObject("user"));
             tweet.save();
@@ -58,9 +75,17 @@ public class Tweet extends Model {
         return tweet;
     }
 
-    public static List<Tweet> fetchAllTweets() {
+    public static void initHighestAndLowestTweetIDs() {
+//        highestTweetID = SQLiteUtils.execSql("SELECT MAX(uid) FROM tweets");
+//        lowestTweetID = (new Select("MIN(uid)").from(Tweet.class).executeSingle()).getId();
+//        Log.d("DEBUG", highestTweetID + " " + lowestTweetID);
+    }
+
+
+    public static List<Tweet> fetchAllTweets(TweetType tweetType) {
         return new Select()
                 .from(Tweet.class)
+                .where("tweetType = ?", tweetType.getValue())
                 .orderBy("uid DESC")
                 .execute();
     }
@@ -70,6 +95,10 @@ public class Tweet extends Model {
                 .from(Tweet.class)
                 .where("uid = ?", uid)
                 .executeSingle();
+    }
+
+    public int getTweetType() {
+        return tweetType;
     }
 
     public String getBody() {
@@ -88,7 +117,7 @@ public class Tweet extends Model {
         return user;
     }
 
-    public static ArrayList<Tweet> fromJSONArray(JSONArray jsonArray) {
+    public static ArrayList<Tweet> fromJSONArray(JSONArray jsonArray, TweetType tweetType) {
         ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 
         long lowestTweetID = 0;
@@ -103,7 +132,7 @@ public class Tweet extends Model {
                 continue;
             }
 
-            Tweet tweet = Tweet.fromJSON(tweetJSON);
+            Tweet tweet = Tweet.fromJSON(tweetJSON, tweetType);
             if (tweet != null) {
                 highestTweetID = Math.max(highestTweetID, tweet.getUid());
                 if (lowestTweetID == 0) {

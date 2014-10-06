@@ -1,4 +1,4 @@
-package com.ravcode.apps.twitterclient;
+package com.ravcode.apps.twitterclient.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,9 @@ import android.view.Menu;
 import android.view.View;
 
 import com.codepath.oauth.OAuthLoginActivity;
+import com.ravcode.apps.twitterclient.R;
+import com.ravcode.apps.twitterclient.TimelineActivity;
+import com.ravcode.apps.twitterclient.TwitterClient;
 
 public class LoginActivity extends OAuthLoginActivity<TwitterClient> {
 

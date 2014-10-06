@@ -34,6 +34,15 @@ public class TwitterClient extends OAuthBaseClient {
 
     public void getHomeTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         String apiURL = getApiUrl("statuses/home_timeline.json");
+        getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
+    }
+
+    public void getMentionsTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        String apiURL = getApiUrl("statuses/mentions_timeline.json");
+        getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
+    }
+
+    private void getTweets(String apiURL, long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         RequestParams requestParams = new RequestParams();
         requestParams.put("exclude_replies", "true");
         requestParams.put("count", "10");
