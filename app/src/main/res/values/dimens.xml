@@ -7,5 +7,7 @@
     <dimen name="tweet_body_text_size">14sp</dimen>
     <dimen name="tweet_meta_info_container_height">40dp</dimen>
     <dimen name="tweet_meta_info_container_width">40dp</dimen>
+    <dimen name="user_profile_width">73dp</dimen>
+    <dimen name="user_profile_height">73dp</dimen>
 
 </resources>

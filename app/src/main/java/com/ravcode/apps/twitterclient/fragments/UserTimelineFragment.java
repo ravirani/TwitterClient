@@ -1,6 +1,5 @@
 package com.ravcode.apps.twitterclient.fragments;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -21,12 +20,13 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  *
  */
-public class HomeTimelineFragment extends TweetsListFragment {
+public class UserTimelineFragment extends TweetsListFragment {
 
-    private TwitterClient twitterClient;
-    public HomeTimelineFragment() {
+    TwitterClient twitterClient;
+    public UserTimelineFragment() {
         // Required empty public constructor
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,10 +39,6 @@ public class HomeTimelineFragment extends TweetsListFragment {
             // Fetch initial data
             populateTimeline(0);
         }
-        else {
-            // If it exists, simulate pull to refresh
-            populateTimeline(-1);
-        }
     }
 
     public void populateTimeline(int page) {
@@ -53,11 +49,11 @@ public class HomeTimelineFragment extends TweetsListFragment {
         final long maxID = page > 0 ? Tweet.getLowestTweetID() : 0;
         final long sinceID = page < 0 ? Tweet.getHighestTweetID() : 0;
 
-        twitterClient.getHomeTimeline(maxID, sinceID, new JsonHttpResponseHandler() {
+        twitterClient.getUserTimeline(maxID, sinceID, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(JSONArray jsonArray) {
                 mPullToRefreshLayout.setRefreshComplete();
-                ArrayList<Tweet> newTweets = Tweet.fromJSONArray(jsonArray, Tweet.TweetType.HOME_TIMELINE);
+                ArrayList<Tweet> newTweets = Tweet.fromJSONArray(jsonArray, Tweet.TweetType.USER_TIMELINE);
 
                 Log.d("DEBUG", jsonArray.toString());
                 if (sinceID > 0) {
@@ -103,6 +99,6 @@ public class HomeTimelineFragment extends TweetsListFragment {
     }
 
     protected List loadInitialData() {
-        return Tweet.fetchAllTweets(Tweet.TweetType.HOME_TIMELINE);
+        return Tweet.fetchAllTweets(Tweet.TweetType.USER_TIMELINE);
     }
 }

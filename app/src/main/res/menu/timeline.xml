@@ -8,4 +8,11 @@
         android:onClick="onCreateNewTweet"
         android:orderInCategory="100"
         android:showAsAction="always" />
+
+    <item android:id="@+id/action_view_profile"
+        android:title="@string/action_view_profile"
+        android:icon="@drawable/ic_menu_profile"
+        android:onClick="viewUserProfile"
+        android:orderInCategory="100"
+        android:showAsAction="always" />
 </menu>

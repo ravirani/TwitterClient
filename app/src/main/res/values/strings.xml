@@ -14,5 +14,12 @@
     <string name="tweet_button_text">Tweet</string>
     <string name="placeholder_compose_tweet">What\'s Happening?</string>
     <string name="tweet_count_default_text">140</string>
+    <string name="action_view_profile">Profile</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="placeholder_tweet_count">1\nTWEET</string>
+    <string name="placeholder_following_count">100\nFOLLOWING</string>
+    <string name="placeholder_followers_count">120\nFOLLOWERS</string>
+    <string name="placeholder_tagline">This is a tag line for the user</string>
 
 </resources>

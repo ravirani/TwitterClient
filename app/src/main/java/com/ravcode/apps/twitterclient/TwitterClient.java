@@ -42,6 +42,11 @@ public class TwitterClient extends OAuthBaseClient {
         getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
     }
 
+    public void getUserTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        String apiURL = getApiUrl("statuses/user_timeline.json");
+        getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
+    }
+
     private void getTweets(String apiURL, long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         RequestParams requestParams = new RequestParams();
         requestParams.put("exclude_replies", "true");

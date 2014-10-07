@@ -2,6 +2,7 @@ package com.ravcode.apps.twitterclient;
 
 import android.app.ActionBar;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -10,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.ravcode.apps.twitterclient.activities.ProfileActivity;
 import com.ravcode.apps.twitterclient.fragments.HomeTimelineFragment;
 import com.ravcode.apps.twitterclient.fragments.MentionsTimelineFragment;
 import com.ravcode.apps.twitterclient.listeners.FragmentTabListener;
@@ -165,5 +167,10 @@ public class TimelineActivity extends FragmentActivity implements com.ravcode.ap
         }
 
         return true;
+    }
+
+    public void viewUserProfile(MenuItem item) {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
     }
 }

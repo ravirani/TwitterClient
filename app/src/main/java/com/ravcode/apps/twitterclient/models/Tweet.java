@@ -1,9 +1,14 @@
 package com.ravcode.apps.twitterclient.models;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
+import com.activeandroid.util.SQLiteUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +26,8 @@ public class Tweet extends Model {
 
     public enum TweetType {
         HOME_TIMELINE(1),
-        MENTIONS_TIMELINE(2);
+        MENTIONS_TIMELINE(2),
+        USER_TIMELINE(3);
 
         TweetType(int value) {
             this.value = value;
@@ -76,9 +82,18 @@ public class Tweet extends Model {
     }
 
     public static void initHighestAndLowestTweetIDs() {
-//        highestTweetID = SQLiteUtils.execSql("SELECT MAX(uid) FROM tweets");
-//        lowestTweetID = (new Select("MIN(uid)").from(Tweet.class).executeSingle()).getId();
-//        Log.d("DEBUG", highestTweetID + " " + lowestTweetID);
+        // Set since_id and max_id on existing data
+        Cursor cursor = Cache.openDatabase().rawQuery("SELECT MAX(uid) FROM tweets", new String[]{});
+        if (cursor.moveToFirst()) {
+            highestTweetID = cursor.getLong(0);
+        }
+        cursor.close();
+
+        cursor = Cache.openDatabase().rawQuery("SELECT MIN(uid) FROM tweets", new String[]{});
+        if (cursor.moveToFirst()) {
+            lowestTweetID = cursor.getLong(0);
+        }
+        cursor.close();
     }
 
 
