@@ -28,6 +28,7 @@ public class ProfileActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         loadUserProfile();
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public void loadUserProfile() {
@@ -110,9 +111,15 @@ public class ProfileActivity extends FragmentActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                return true;
+
+            case android.R.id.home:
+                finish();
+                break;
         }
+
         return super.onOptionsItemSelected(item);
     }
 }

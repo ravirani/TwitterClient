@@ -15,6 +15,7 @@ import com.ravcode.apps.twitterclient.activities.ProfileActivity;
 import com.ravcode.apps.twitterclient.fragments.HomeTimelineFragment;
 import com.ravcode.apps.twitterclient.fragments.MentionsTimelineFragment;
 import com.ravcode.apps.twitterclient.listeners.FragmentTabListener;
+import com.ravcode.apps.twitterclient.models.Tweet;
 import com.ravcode.apps.twitterclient.utils.NetworkConnectivity;
 
 import org.json.JSONException;
@@ -30,6 +31,9 @@ public class TimelineActivity extends FragmentActivity implements com.ravcode.ap
     private String mProfileImageURL;
     private String mUserName;
     private String mUserScreenName;
+
+    private static String TAG_HOME = "home";
+    private static String TAG_MENTIONS = "mentions";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +65,7 @@ public class TimelineActivity extends FragmentActivity implements com.ravcode.ap
                 .setText("Home")
                 .setTag("HomeTimelineFragment")
                 .setTabListener(
-                        new FragmentTabListener<HomeTimelineFragment>(R.id.flContainer, this, "home",
+                        new FragmentTabListener<HomeTimelineFragment>(R.id.flContainer, this, TAG_HOME,
                                 HomeTimelineFragment.class));
 
         actionBar.addTab(homeTab);
@@ -72,7 +76,7 @@ public class TimelineActivity extends FragmentActivity implements com.ravcode.ap
                 .setText("Mentions")
                 .setTag("MentionsTimelineFragment")
                 .setTabListener(
-                        new FragmentTabListener<MentionsTimelineFragment>(R.id.flContainer, this, "mentions",
+                        new FragmentTabListener<MentionsTimelineFragment>(R.id.flContainer, this, TAG_MENTIONS,
                                 MentionsTimelineFragment.class));
 
         actionBar.addTab(mentionsTab);
@@ -135,13 +139,14 @@ public class TimelineActivity extends FragmentActivity implements com.ravcode.ap
     }
 
     public void OnComposeTweet(long newlyAddedTweetID) {
-//        if (newlyAddedTweetID > 0) {
-//            Tweet tweet = Tweet.getTweetByID(newlyAddedTweetID);
-//
-//            if (tweet != null) {
-//                homeTimelineFragment.insertTweet(tweet, 0);
-//            }
-//        }
+        if (newlyAddedTweetID > 0) {
+            Tweet tweet = Tweet.getTweetByID(newlyAddedTweetID, Tweet.TweetType.HOME_TIMELINE);
+
+            if (tweet != null) {
+                HomeTimelineFragment homeTimelineFragment = (HomeTimelineFragment)getSupportFragmentManager().findFragmentByTag(TAG_HOME);
+                homeTimelineFragment.insertTweet(tweet, 0);
+            }
+        }
     }
 
     private void saveUserCredentialsToPreferences() {

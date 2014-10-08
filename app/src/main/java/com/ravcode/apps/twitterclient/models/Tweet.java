@@ -43,7 +43,7 @@ public class Tweet extends Model {
     @Column(name = "body")
     private String body;
 
-    @Column(name = "uid", index = true, unique = true)
+    @Column(name = "uid", index = true)
     private long uid;
 
     @Column (name = "tweetType", index = true)
@@ -55,14 +55,11 @@ public class Tweet extends Model {
     @Column(name = "user", onUpdate = Column.ForeignKeyAction.CASCADE, onDelete = Column.ForeignKeyAction.CASCADE)
     private User user;
 
-    private static long lowestTweetID = 0;
-    private static long highestTweetID = 0;
-
     public static Tweet fromJSON(JSONObject tweetJSONObject, TweetType tweetType) {
         Tweet tweet = new Tweet();
         try {
             long tweetID = tweetJSONObject.getLong("id");
-            if (Tweet.getTweetByID(tweetID) != null) {
+            if (Tweet.getTweetByID(tweetID, tweetType) != null) {
                 // Do not return existing tweets
                 return null;
             }
@@ -81,22 +78,6 @@ public class Tweet extends Model {
         return tweet;
     }
 
-    public static void initHighestAndLowestTweetIDs() {
-        // Set since_id and max_id on existing data
-        Cursor cursor = Cache.openDatabase().rawQuery("SELECT MAX(uid) FROM tweets", new String[]{});
-        if (cursor.moveToFirst()) {
-            highestTweetID = cursor.getLong(0);
-        }
-        cursor.close();
-
-        cursor = Cache.openDatabase().rawQuery("SELECT MIN(uid) FROM tweets", new String[]{});
-        if (cursor.moveToFirst()) {
-            lowestTweetID = cursor.getLong(0);
-        }
-        cursor.close();
-    }
-
-
     public static List<Tweet> fetchAllTweets(TweetType tweetType) {
         return new Select()
                 .from(Tweet.class)
@@ -105,10 +86,10 @@ public class Tweet extends Model {
                 .execute();
     }
 
-    public static Tweet getTweetByID(long uid) {
+    public static Tweet getTweetByID(long uid, TweetType tweetType) {
         return new Select()
                 .from(Tweet.class)
-                .where("uid = ?", uid)
+                .where("uid = ? AND tweetType = ?", uid, tweetType.getValue())
                 .executeSingle();
     }
 
@@ -135,8 +116,6 @@ public class Tweet extends Model {
     public static ArrayList<Tweet> fromJSONArray(JSONArray jsonArray, TweetType tweetType) {
         ArrayList<Tweet> tweets = new ArrayList<Tweet>();
 
-        long lowestTweetID = 0;
-        long highestTweetID = 0;
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject tweetJSON = null;
             try {
@@ -149,23 +128,10 @@ public class Tweet extends Model {
 
             Tweet tweet = Tweet.fromJSON(tweetJSON, tweetType);
             if (tweet != null) {
-                highestTweetID = Math.max(highestTweetID, tweet.getUid());
-                if (lowestTweetID == 0) {
-                    lowestTweetID = tweet.getUid();
-                }
-
-                if (lowestTweetID > tweet.getUid()) {
-                    lowestTweetID = tweet.getUid();
-                }
-
                 tweets.add(tweet);
             }
         }
 
-        // Reduced by one to remove duplicates
-        // https://dev.twitter.com/rest/public/timelines
-        Tweet.lowestTweetID = lowestTweetID - 1;
-        Tweet.highestTweetID = highestTweetID;
         return tweets;
     }
 
@@ -174,11 +140,25 @@ public class Tweet extends Model {
         return body;
     }
 
-    public static long getLowestTweetID() {
-        return lowestTweetID;
+    public static long getLowestTweetID(TweetType mTweetType) {
+        long lowestTweetID = 0;
+        Cursor cursor = Cache.openDatabase().rawQuery("SELECT MIN(uid) FROM tweets WHERE tweetType = " + mTweetType.getValue(), new String[]{});
+        if (cursor.moveToFirst()) {
+            lowestTweetID = cursor.getLong(0);
+        }
+        cursor.close();
+
+        return Math.min(lowestTweetID, lowestTweetID - 1);
     }
 
-    public static long getHighestTweetID() {
+    public static long getHighestTweetID(TweetType mTweetType) {
+        long highestTweetID = 0;
+        Cursor cursor = Cache.openDatabase().rawQuery("SELECT MAX(uid) FROM tweets WHERE tweetType = " + mTweetType.getValue(), new String[]{});
+        if (cursor.moveToFirst()) {
+            highestTweetID = cursor.getLong(0);
+        }
+        cursor.close();
+
         return highestTweetID;
     }
 }

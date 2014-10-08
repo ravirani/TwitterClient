@@ -5,6 +5,7 @@ import android.content.Context;
 import com.codepath.oauth.OAuthBaseClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.ravcode.apps.twitterclient.models.Tweet;
 
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
@@ -31,6 +32,23 @@ public class TwitterClient extends OAuthBaseClient {
 	public TwitterClient(Context context) {
 		super(context, REST_API_CLASS, REST_URL, REST_CONSUMER_KEY, REST_CONSUMER_SECRET, REST_CALLBACK_URL);
 	}
+
+    public void getTimeline(Tweet.TweetType tweetType, long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        switch (tweetType) {
+            case HOME_TIMELINE:
+                getHomeTimeline(maxID, sinceID, asyncHttpResponseHandler);
+                break;
+
+            case USER_TIMELINE:
+                getUserTimeline(maxID, sinceID, asyncHttpResponseHandler);
+                break;
+
+            case MENTIONS_TIMELINE:
+                getMentionsTimeline(maxID, sinceID, asyncHttpResponseHandler);
+                break;
+        }
+    }
+
 
     public void getHomeTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         String apiURL = getApiUrl("statuses/home_timeline.json");
