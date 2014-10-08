@@ -1,6 +1,7 @@
 package com.ravcode.apps.twitterclient;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.ravcode.apps.twitterclient.activities.ProfileActivity;
 import com.ravcode.apps.twitterclient.models.Tweet;
 
 import java.util.List;
@@ -33,7 +35,7 @@ public class TweetArrayAdapter extends ArrayAdapter<Tweet> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        Tweet tweet = getItem(position);
+        final Tweet tweet = getItem(position);
         ViewHolder viewHolder;
 
         if (convertView == null) {
@@ -59,6 +61,15 @@ public class TweetArrayAdapter extends ArrayAdapter<Tweet> {
         viewHolder.tvScreenName.setText("@" + tweet.getUser().getScreenName());
         viewHolder.tvTimestamp.setText(com.ravcode.apps.twitterclient.RelativeDate.getRelativeDate(tweet.getCreatedAt()));
         viewHolder.tvTweetBody.setText(tweet.getBody());
+
+        viewHolder.ivUserProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), ProfileActivity.class);
+                intent.putExtra("user_id", tweet.getUser().getUid());
+                getContext().startActivity(intent);
+            }
+        });
 
         return convertView;
     }

@@ -1,8 +1,11 @@
 package com.ravcode.apps.twitterclient.activities;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,17 +26,29 @@ import org.json.JSONObject;
 
 public class ProfileActivity extends FragmentActivity {
 
+    private long mUserID;
+
+    public long getUserID() {
+        return mUserID;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mUserID = getIntent().getLongExtra("user_id", 0);
         setContentView(R.layout.activity_profile);
         loadUserProfile();
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    @Override
+    public View onCreateView(String name, @NonNull Context context, @NonNull AttributeSet attrs) {
+        return super.onCreateView(name, context, attrs);
+    }
+
     public void loadUserProfile() {
         TwitterClient twitterClient = TwitterApplication.getRestClient();
-        twitterClient.getLoggedInUserCredentials(new JsonHttpResponseHandler() {
+        JsonHttpResponseHandler jsonHttpResponseHandler = new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(JSONObject jsonObject) {
                 User user = User.fromJSON(jsonObject);
@@ -46,7 +61,14 @@ public class ProfileActivity extends FragmentActivity {
             public void onFailure(Throwable throwable, JSONObject jsonObject) {
                 super.onFailure(throwable, jsonObject);
             }
-        });
+        };
+
+        if (mUserID > 0) {
+            twitterClient.getUserInfo(mUserID, jsonHttpResponseHandler);
+        }
+        else {
+            twitterClient.getLoggedInUserCredentials(jsonHttpResponseHandler);
+        }
     }
 
     public void populateProfile(User user) {

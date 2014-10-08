@@ -7,6 +7,7 @@ import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
+import com.activeandroid.query.Delete;
 import com.activeandroid.query.Select;
 import com.activeandroid.util.SQLiteUtils;
 
@@ -90,6 +91,13 @@ public class Tweet extends Model {
         return new Select()
                 .from(Tweet.class)
                 .where("uid = ? AND tweetType = ?", uid, tweetType.getValue())
+                .executeSingle();
+    }
+
+    public static Tweet deleteTweetsOfType(TweetType tweetType) {
+        return new Delete()
+                .from(Tweet.class)
+                .where("tweetType = ?", tweetType.getValue())
                 .executeSingle();
     }
 

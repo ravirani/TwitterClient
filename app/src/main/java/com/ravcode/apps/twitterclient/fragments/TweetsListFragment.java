@@ -37,7 +37,7 @@ abstract public class TweetsListFragment extends Fragment {
     private ListView lvTweets;
     protected PullToRefreshLayout mPullToRefreshLayout;
     protected Tweet.TweetType mTweetType;
-    private TwitterClient twitterClient;
+    protected TwitterClient twitterClient;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -75,7 +75,7 @@ abstract public class TweetsListFragment extends Fragment {
         final long maxID = page > 0 ? Tweet.getLowestTweetID(mTweetType) : 0;
         final long sinceID = page < 0 ? Tweet.getHighestTweetID(mTweetType) : 0;
 
-        twitterClient.getTimeline(mTweetType, maxID, sinceID, new JsonHttpResponseHandler() {
+        JsonHttpResponseHandler jsonHttpResponseHandler = new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(JSONArray jsonArray) {
                 mPullToRefreshLayout.setRefreshComplete();
@@ -106,7 +106,9 @@ abstract public class TweetsListFragment extends Fragment {
                 mPullToRefreshLayout.setRefreshComplete();
                 Toast.makeText(getActivity(), "Failed fetching tweets = " + s, Toast.LENGTH_LONG).show();
             }
-        });
+        };
+
+        getData(maxID, sinceID, jsonHttpResponseHandler);
     }
 
     private Boolean checkNetworkConnection() {
@@ -167,5 +169,9 @@ abstract public class TweetsListFragment extends Fragment {
 
     protected List loadInitialData() {
         return Tweet.fetchAllTweets(mTweetType);
+    }
+
+    protected void getData(long maxID, long sinceID, JsonHttpResponseHandler jsonHttpResponseHandler) {
+        twitterClient.getTimeline(mTweetType, maxID, sinceID, jsonHttpResponseHandler);
     }
 }

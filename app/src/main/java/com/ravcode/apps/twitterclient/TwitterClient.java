@@ -52,29 +52,39 @@ public class TwitterClient extends OAuthBaseClient {
 
     public void getHomeTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         String apiURL = getApiUrl("statuses/home_timeline.json");
-        getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
+        getTweets(apiURL, 0, maxID, sinceID, asyncHttpResponseHandler);
     }
 
     public void getMentionsTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         String apiURL = getApiUrl("statuses/mentions_timeline.json");
-        getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
+        getTweets(apiURL, 0, maxID, sinceID, asyncHttpResponseHandler);
     }
 
     public void getUserTimeline(long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         String apiURL = getApiUrl("statuses/user_timeline.json");
-        getTweets(apiURL, maxID, sinceID, asyncHttpResponseHandler);
+        getTweets(apiURL, 0, maxID, sinceID, asyncHttpResponseHandler);
     }
 
-    private void getTweets(String apiURL, long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+    public void getUserTimeline(long userID, long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        String apiURL = getApiUrl("statuses/user_timeline.json");
+        getTweets(apiURL, userID, maxID, sinceID, asyncHttpResponseHandler);
+    }
+
+
+    private void getTweets(String apiURL, long userID, long maxID, long sinceID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         RequestParams requestParams = new RequestParams();
         requestParams.put("exclude_replies", "true");
         requestParams.put("count", "10");
         if (maxID > 0) {
             // Right way to achieve pagination - https://dev.twitter.com/rest/public/timelines
-            requestParams.put("max_id", "" + maxID);
+            requestParams.put("max_id", Long.toString(maxID));
         }
         else if (sinceID > 0) {
-            requestParams.put("since_id", "" + sinceID);
+            requestParams.put("since_id", Long.toString(sinceID));
+        }
+
+        if (userID > 0) {
+            requestParams.put("user_id", Long.toString(userID));
         }
 
         client.get(apiURL, requestParams, asyncHttpResponseHandler);
@@ -85,6 +95,13 @@ public class TwitterClient extends OAuthBaseClient {
         RequestParams requestParams = new RequestParams();
         requestParams.put("include_entities", "false");
         requestParams.put("skip_status", "true");
+        client.get(apiURL, requestParams, asyncHttpResponseHandler);
+    }
+
+    public void getUserInfo(long userID, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        String apiURL = getApiUrl("users/show.json");
+        RequestParams requestParams = new RequestParams();
+        requestParams.put("user_id", Long.toString(userID));
         client.get(apiURL, requestParams, asyncHttpResponseHandler);
     }
 
